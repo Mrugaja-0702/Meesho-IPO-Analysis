@@ -1,4 +1,4 @@
-# Meesho Limited — IPO Analysis
+# Meesho Limited - IPO Analysis
 An independent equity-research exercise analysing Meesho's December 2025 IPO — from company background 
 and industry structure through financial statement analysis, relative and intrinsic (DCF) valuation, 
 investment thesis, ESG, and a final recommendation.
