@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Meesho IPO - Interactive Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --magenta:#E5006D; --magenta-dark:#A8004F; --tint:#FCE4EF;
+    --ink:#141B2B; --slate:#5A6B84; --paper:#F5F6F9; --card:#FFFFFF; --line:#E7EBF0;
+    --teal:#0E9F8E; --amber:#E0912F; --green:#2E9E7B; --red:#D64545; --blue:#3B6EA5;
+    --shadow:0 1px 2px rgba(20,27,43,.04), 0 6px 20px rgba(20,27,43,.06);
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font-family:Inter,system-ui,sans-serif;line-height:1.5;
+    background-image:radial-gradient(circle at 100% -10%, rgba(229,0,109,.05), transparent 45%);}
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 22px 60px}
+  .mono{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+  h1,h2,h3{font-family:"Space Grotesk",sans-serif;margin:0;letter-spacing:-.01em}
+
+  /* header */
+  header .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--magenta);font-weight:600}
+  header h1{font-size:clamp(28px,4.6vw,44px);font-weight:700;line-height:1.05;margin:.28em 0 .12em}
+  header .sub{color:var(--slate);font-size:15.5px;max-width:60ch}
+  .rule{height:3px;width:64px;background:var(--magenta);border-radius:3px;margin:16px 0 26px}
+
+  /* hero stat band */
+  .hero{display:grid;grid-template-columns:1.35fr 1fr 1fr;gap:14px;margin-bottom:14px}
+  .hero .card{position:relative;overflow:hidden}
+  .hero .big{font-family:"Space Grotesk";font-weight:700;font-size:clamp(30px,4.4vw,46px);line-height:1}
+  .hero .lbl{color:var(--slate);font-size:13px;margin-top:6px}
+  .pill{display:inline-block;font-family:"IBM Plex Mono";font-size:12px;font-weight:600;
+    padding:2px 8px;border-radius:20px;margin-top:10px}
+  .pill.up{background:rgba(46,158,123,.12);color:var(--green)}
+  .pill.mag{background:var(--tint);color:var(--magenta-dark)}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 18px 16px;box-shadow:var(--shadow)}
+  .card h3{font-size:15px;font-weight:600}
+  .card .cap{color:var(--slate);font-size:12px;margin-top:2px;margin-bottom:8px}
+
+  /* KPI row */
+  .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin:16px 0 22px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 14px;box-shadow:var(--shadow)}
+  .kpi .v{font-family:"Space Grotesk";font-weight:700;font-size:22px;line-height:1.05}
+  .kpi .k{color:var(--slate);font-size:11.5px;margin-top:4px;line-height:1.3}
+  .kpi .u{color:var(--magenta);font-size:10.5px;font-family:"IBM Plex Mono";font-weight:600}
+
+  /* grid of panels */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .grid .span2{grid-column:1 / -1}
+  svg{display:block;width:100%;height:auto;overflow:visible}
+  .axis{font-family:"IBM Plex Mono",monospace;font-size:11px;fill:var(--slate)}
+  .vlabel{font-family:"IBM Plex Mono",monospace;font-size:11.5px;font-weight:600;fill:var(--ink)}
+  .barlbl{font-size:11.5px;fill:var(--ink);font-weight:500}
+
+  .toggle{display:inline-flex;gap:4px;background:var(--paper);border:1px solid var(--line);
+    border-radius:9px;padding:3px;margin-left:auto}
+  .toggle button{font-family:"IBM Plex Mono";font-size:11.5px;font-weight:600;border:0;background:transparent;
+    color:var(--slate);padding:5px 10px;border-radius:6px;cursor:pointer}
+  .toggle button[aria-pressed="true"]{background:var(--ink);color:#fff}
+  .rowhead{display:flex;align-items:center;gap:8px}
+
+  /* DCF calculator */
+  .dcf{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:center}
+  .dcf label{display:block;font-size:12.5px;color:var(--slate);margin:14px 0 4px;font-weight:500}
+  .dcf .val{font-family:"IBM Plex Mono";font-weight:600;color:var(--ink)}
+  input[type=range]{width:100%;accent-color:var(--magenta);height:22px}
+  .fv{font-family:"Space Grotesk";font-weight:700;font-size:clamp(38px,6vw,58px);line-height:1}
+  .fv-lbl{color:var(--slate);font-size:12.5px;font-family:"IBM Plex Mono";letter-spacing:.04em}
+  .verdict{margin-top:12px;font-size:13px;padding:9px 12px;border-radius:9px;background:var(--paper);border:1px solid var(--line)}
+  .marks{display:flex;gap:16px;margin-top:12px;font-size:12px;color:var(--slate)}
+  .marks b{font-family:"IBM Plex Mono";color:var(--ink)}
+
+  .tip{position:fixed;pointer-events:none;background:var(--ink);color:#fff;font-family:"IBM Plex Mono";
+    font-size:11.5px;padding:5px 8px;border-radius:6px;opacity:0;transform:translateY(-4px);
+    transition:opacity .12s;z-index:20;white-space:nowrap}
+
+  footer{margin-top:26px;color:var(--slate);font-size:12px;line-height:1.6;border-top:1px solid var(--line);padding-top:16px}
+  footer b{color:var(--ink)}
+
+  @media (max-width:820px){
+    .hero{grid-template-columns:1fr 1fr}
+    .kpis{grid-template-columns:repeat(3,1fr)}
+    .grid{grid-template-columns:1fr}
+    .dcf{grid-template-columns:1fr}
+  }
+  @media (max-width:480px){ .hero{grid-template-columns:1fr} .kpis{grid-template-columns:repeat(2,1fr)} }
+  @media (prefers-reduced-motion:reduce){ *{transition:none!important;animation:none!important} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">IPO Analysis · December 2025 · NSE / BSE</div>
+    <h1>Meesho Limited</h1>
+    <div class="sub">India's first horizontal e-commerce platform to list a value-commerce marketplace that came to market near breakeven, priced at a discount to peers, and re-rated hard after debut. Key metrics, interactively.</div>
+    <div class="rule"></div>
+  </header>
+
+  <section class="hero">
+    <div class="card">
+      <div class="eyebrow" style="color:var(--slate)">Price journey</div>
+      <div id="spark"></div>
+    </div>
+    <div class="card">
+      <div class="big mono" style="color:var(--green)">+46%</div>
+      <div class="lbl">Listing-day gain<br>₹111 to ₹162.5 (10 Dec 25)</div>
+      <span class="pill up">strong debut</span>
+    </div>
+    <div class="card">
+      <div class="big mono" style="color:var(--magenta)">81.8×</div>
+      <div class="lbl">Overall subscription<br>QIB 123× · NII 40× · Retail 20×</div>
+      <span class="pill mag">broad demand</span>
+    </div>
+  </section>
+
+  <section class="kpis" id="kpis"></section>
+
+  <section class="grid">
+    <div class="card">
+      <div class="rowhead">
+        <div><h3>Revenue & profitability</h3><div class="cap">FY23 to H1 FY26 · ₹ crore</div></div>
+        <div class="toggle" id="finToggle">
+          <button data-k="revenue" aria-pressed="true">Revenue</button>
+          <button data-k="net" aria-pressed="false">Net loss</button>
+          <button data-k="fcf" aria-pressed="false">FCF</button>
+        </div>
+      </div>
+      <div id="finChart"></div>
+    </div>
+
+    <div class="card">
+      <h3>Subscription by investor category</h3>
+      <div class="cap">Times the offer was subscribed</div>
+      <div id="subChart"></div>
+    </div>
+
+    <div class="card">
+      <h3>FY25 cost structure</h3>
+      <div class="cap">Where every rupee of spend went · logistics dominates</div>
+      <div id="costChart"></div>
+    </div>
+
+    <div class="card">
+      <h3>Use of ₹4,250 cr fresh proceeds</h3>
+      <div class="cap">Growth-oriented, largely intangible investment</div>
+      <div id="proChart"></div>
+    </div>
+
+    <div class="card span2">
+      <h3>Valuation vs listed peers</h3>
+      <div class="cap">Price-to-sales, current (~Jun 2026). Meesho was 5.3× at the ₹111 issue price.</div>
+      <div id="peerChart"></div>
+    </div>
+
+    <div class="card span2" style="background:linear-gradient(180deg,#fff, #fffafc);">
+      <div class="rowhead" style="margin-bottom:4px">
+        <div><h3>Live DCF: build your own fair value</h3>
+          <div class="cap">10-year FCFF model. Drag the assumptions; the intrinsic value recomputes instantly.</div></div>
+      </div>
+      <div class="dcf">
+        <div>
+          <label>WACC (discount rate) · <span class="val" id="waccV">13.0%</span></label>
+          <input type="range" id="wacc" min="10" max="18" step="0.5" value="13">
+          <label>Terminal growth (g) · <span class="val" id="gV">5.0%</span></label>
+          <input type="range" id="g" min="3" max="6.5" step="0.25" value="5">
+          <div class="marks">
+            <span>Issue <b>₹111</b></span><span>Current <b>₹192</b></span><span>Base <b>₹138</b></span>
+          </div>
+        </div>
+        <div style="text-align:center">
+          <div class="fv mono" id="fv">₹138</div>
+          <div class="fv-lbl">implied fair value / share</div>
+          <div class="verdict" id="verdict"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <b>Sources:</b> Meesho RHP/DRHP (SEBI); BSE/NSE; RBI MPC (Dec 2025); Choice Equity &amp; JM Financial notes; Screener.in / exchange data (~Jun 2026). Figures in ₹ crore unless stated; peer revenue years differ as labelled.<br>
+    <b>Disclaimer:</b> Independent academic exercise for educational purposes, not investment advice. The DCF is illustrative; verify all figures against the RHP before any decision.
+  </footer>
+</div>
+
+<div class="tip" id="tip"></div>
+
+<script>
+const NS="http://www.w3.org/2000/svg";
+const C={magenta:"#E5006D",magentaDark:"#A8004F",ink:"#141B2B",slate:"#5A6B84",teal:"#0E9F8E",amber:"#E0912F",green:"#2E9E7B",red:"#D64545",blue:"#3B6EA5",line:"#E7EBF0",tint:"#FCE4EF"};
+const tip=document.getElementById("tip");
+function E(t,a={}){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;}
+function showTip(ev,html){tip.innerHTML=html;tip.style.opacity=1;tip.style.left=(ev.clientX+12)+"px";tip.style.top=(ev.clientY-6)+"px";}
+function hideTip(){tip.style.opacity=0;}
+function hover(el,html){el.addEventListener("mousemove",e=>showTip(e,html));el.addEventListener("mouseleave",hideTip);el.style.cursor="default";}
+
+const kpis=[
+ ["234.2","Annual transacting users","million"],
+ ["706.5","Active sellers","'000"],
+ ["₹29.4","GMV per employee","₹ cr"],
+ ["30.5%","Take rate","of value billed"],
+ ["₹50,096","Market cap at issue","~$5.6bn"],
+ ["5.3×","P/S at issue","9.2× now"],
+];
+const kbox=document.getElementById("kpis");
+kpis.forEach(([v,k,u])=>{const d=document.createElement("div");d.className="kpi";
+ d.innerHTML=`<div class="v mono">${v}</div><div class="k">${k}</div><div class="u">${u}</div>`;kbox.appendChild(d);});
+
+(function(){
+ const w=440,h=118,pad=26;
+ const pts=[["Issue",111],["Listing",162.5],["Current",192],["52w high",254.4]];
+ const svg=E("svg",{viewBox:`0 0 ${w} ${h}`});
+ const max=270,min=90, X=i=>pad+i*(w-2*pad)/(pts.length-1), Y=v=>h-18-(v-min)/(max-min)*(h-40);
+ 
+ let d=`M ${X(0)} ${Y(pts[0][1])}`; pts.forEach((p,i)=>d+=` L ${X(i)} ${Y(p[1])}`);
+ const area=d+` L ${X(pts.length-1)} ${h-18} L ${X(0)} ${h-18} Z`;
+ svg.appendChild(E("path",{d:area,fill:"url(#gp)"}));
+ const grad=E("linearGradient",{id:"gp",x1:0,y1:0,x2:0,y2:1});
+ grad.appendChild(E("stop",{offset:"0%","stop-color":C.magenta,"stop-opacity":.22}));
+ grad.appendChild(E("stop",{offset:"100%","stop-color":C.magenta,"stop-opacity":0}));
+ svg.appendChild(grad);
+ svg.appendChild(E("path",{d,fill:"none",stroke:C.magenta,"stroke-width":2.4,"stroke-linjoin":"round"}));
+ pts.forEach((p,i)=>{const cx=X(i),cy=Y(p[1]);
+   const c=E("circle",{cx,cy,r:i===pts.length-2?5:4,fill:i===pts.length-2?C.magenta:"#fff",stroke:C.magenta,"stroke-width":2});
+   svg.appendChild(c);
+   svg.appendChild(E("text",{x:cx,y:cy-9,"text-anchor":"middle",class:"vlabel"})).textContent="₹"+p[1];
+   const t=E("text",{x:cx,y:h-4,"text-anchor":"middle",class:"axis"});t.textContent=p[0];svg.appendChild(t);
+ });
+ document.getElementById("spark").appendChild(svg);
+})();
+
+const FIN={
+ revenue:{data:[["FY23",5734.5],["FY24",7615.1],["FY25",9389.9],["H1FY26",5577.5]],color:C.teal,pos:true,title:"Revenue from operations"},
+ net:{data:[["FY23",-1671.9],["FY24",-327.6],["FY25",-3941.7],["H1FY26",-700.7]],color:C.red,pos:false,title:"Reported net loss"},
+ fcf:{data:[["FY23",-2336],["FY24",304],["FY25",351],["H1FY26",null]],color:C.blue,pos:null,title:"Free cash flow"},
+};
+function drawFin(key){
+ const box=document.getElementById("finChart");box.innerHTML="";
+ const s=FIN[key],w=440,h=210,padL=44,padB=26,padT=10;
+ const vals=s.data.map(d=>d[1]).filter(v=>v!==null);
+ const max=Math.max(...vals,0),min=Math.min(...vals,0),rng=(max-min)||1;
+ const svg=E("svg",{viewBox:`0 0 ${w} ${h}`});
+ const Y=v=>padT+(max-v)/rng*(h-padT-padB);
+ const zero=Y(0);
+ svg.appendChild(E("line",{x1:padL,y1:zero,x2:w-8,y2:zero,stroke:C.line}));
+ const bw=(w-padL-14)/s.data.length;
+ s.data.forEach((d,i)=>{
+   const x=padL+i*bw+bw*0.18, bwid=bw*0.64;
+   if(d[1]===null){svg.appendChild(E("text",{x:x+bwid/2,y:zero-6,"text-anchor":"middle",class:"axis"})).textContent="n/a";}
+   else{
+     const y=Math.min(zero,Y(d[1])), bh=Math.abs(Y(d[1])-zero);
+     const col=key==="fcf"?(d[1]>=0?C.green:C.red):s.color;
+     const r=E("rect",{x,y,width:bwid,height:Math.max(bh,1),rx:3,fill:col,opacity:.92});
+     hover(r,`${d[0]}: <b>₹${d[1].toLocaleString('en-IN')} cr</b>`);svg.appendChild(r);
+     svg.appendChild(E("text",{x:x+bwid/2,y:d[1]>=0?y-5:y+bh+13,"text-anchor":"middle",class:"vlabel"})).textContent=(d[1]/1000).toFixed(d[1]>=0?1:1)+"k";
+   }
+   svg.appendChild(E("text",{x:padL+i*bw+bw/2,y:h-8,"text-anchor":"middle",class:"axis"})).textContent=d[0];
+ });
+ box.appendChild(svg);
+}
+document.querySelectorAll("#finToggle button").forEach(b=>b.addEventListener("click",()=>{
+ document.querySelectorAll("#finToggle button").forEach(x=>x.setAttribute("aria-pressed","false"));
+ b.setAttribute("aria-pressed","true");drawFin(b.dataset.k);
+}));
+drawFin("revenue");
+
+(function(){
+ const data=[["QIB",123.34,C.magenta],["NII",39.85,C.blue],["Retail",19.89,C.teal],["Overall",81.76,C.ink]];
+ const w=440,h=190,padL=64,padR=42,max=130;
+ const svg=E("svg",{viewBox:`0 0 ${w} ${h}`});
+ const bh=(h-16)/data.length;
+ data.forEach((d,i)=>{
+   const y=8+i*bh+bh*0.2, len=(d[1]/max)*(w-padL-padR);
+   svg.appendChild(E("text",{x:padL-8,y:y+bh*0.34,"text-anchor":"end",class:"barlbl"})).textContent=d[0];
+   const r=E("rect",{x:padL,y,width:Math.max(len,1),height:bh*0.6,rx:4,fill:d[2],opacity:d[0]==="Overall"?.9:.85});
+   hover(r,`${d[0]}: <b>${d[1]}×</b> subscribed`);svg.appendChild(r);
+   svg.appendChild(E("text",{x:padL+len+6,y:y+bh*0.44,class:"vlabel"})).textContent=d[1].toFixed(1)+"×";
+ });
+ document.getElementById("subChart").appendChild(svg);
+})();
+
+function donut(elId,data,unit){
+ const w=440,h=210,cx=118,cy=105,r=78,ir=46;
+ const svg=E("svg",{viewBox:`0 0 ${w} ${h}`});
+ const total=data.reduce((a,b)=>a+b[1],0);let ang=-Math.PI/2;
+ data.forEach(d=>{
+   const a2=ang+d[1]/total*Math.PI*2;
+   const x1=cx+r*Math.cos(ang),y1=cy+r*Math.sin(ang),x2=cx+r*Math.cos(a2),y2=cy+r*Math.sin(a2);
+   const xi1=cx+ir*Math.cos(a2),yi1=cy+ir*Math.sin(a2),xi2=cx+ir*Math.cos(ang),yi2=cy+ir*Math.sin(ang);
+   const large=(a2-ang)>Math.PI?1:0;
+   const path=E("path",{d:`M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} L ${xi1} ${yi1} A ${ir} ${ir} 0 ${large} 0 ${xi2} ${yi2} Z`,fill:d[2]});
+   hover(path,`${d[0]}: <b>₹${d[1].toLocaleString('en-IN')} cr</b> (${(d[1]/total*100).toFixed(0)}%)`);
+   svg.appendChild(path);ang=a2;
+ });
+ svg.appendChild(E("text",{x:cx,y:cy-4,"text-anchor":"middle",class:"vlabel",style:"font-size:15px"})).textContent="₹"+(total/1000).toFixed(1)+"k cr";
+ svg.appendChild(E("text",{x:cx,y:cy+13,"text-anchor":"middle",class:"axis"})).textContent="total";
+ 
+ let ly=26;data.forEach(d=>{
+   svg.appendChild(E("rect",{x:236,y:ly-9,width:11,height:11,rx:2,fill:d[2]}));
+   const t=E("text",{x:252,y:ly,class:"barlbl",style:"font-size:11px"});
+   t.textContent=`${d[0]} · ${(d[1]/total*100).toFixed(0)}%`;svg.appendChild(t);ly+=22;
+ });
+ document.getElementById(elId).appendChild(svg);
+}
+donut("costChart",[["Logistics & fulfilment",7352,C.magenta],["Employee",848.1,C.blue],["Advertising",643.5,C.amber],["Server & software",620,C.teal],["Other",545.7,"#B8C0CE"]]);
+
+(function(){
+ const data=[["Cloud infrastructure",1390,C.magenta],["Marketing & brand",1020,C.blue],["AI/ML & tech hiring",480,C.teal],["Inorganic & general",1360,"#B8C0CE"]];
+ const w=440,h=140,padL=12,total=data.reduce((a,b)=>a+b[1],0);
+ const svg=E("svg",{viewBox:`0 0 ${w} ${h}`});
+ let x=padL;const barY=16,barH=34,full=w-2*padL;
+ data.forEach(d=>{const len=d[1]/total*full;
+   const r=E("rect",{x,y:barY,width:len,height:barH,fill:d[2],opacity:.92});
+   hover(r,`${d[0]}: <b>₹${d[1].toLocaleString('en-IN')} cr</b>`);svg.appendChild(r);x+=len;});
+ let ly=78;data.forEach((d,i)=>{const col=i%2, lx=padL+col*220, yy=ly+Math.floor(i/2)*24;
+   svg.appendChild(E("rect",{x:lx,y:yy-10,width:11,height:11,rx:2,fill:d[2]}));
+   svg.appendChild(E("text",{x:lx+16,y:yy,class:"barlbl",style:"font-size:11.5px"})).textContent=`${d[0]} : ₹${d[1]} cr`;
+ });
+ document.getElementById("proChart").appendChild(svg);
+})();
+
+(function(){
+ const data=[["Meesho",9.2,true],["Eternal (Zomato)",12.0,false],["Nykaa (FSN)",8.8,false],["Swiggy",3.8,false],["DMart",4.6,false],["FirstCry",1.5,false]];
+ const w=920,h=210,padL=20,padB=42,padT=16,max=13;
+ const svg=E("svg",{viewBox:`0 0 ${w} ${h}`});
+ const bw=(w-2*padL)/data.length;
+ const base=h-padB;
+ svg.appendChild(E("line",{x1:padL,y1:base,x2:w-padL,y2:base,stroke:C.line}));
+ data.forEach((d,i)=>{
+   const x=padL+i*bw+bw*0.2, bwid=bw*0.6, bh=(d[1]/max)*(base-padT), y=base-bh;
+   const r=E("rect",{x,y,width:bwid,height:bh,rx:4,fill:d[2]?C.magenta:C.blue,opacity:d[2]?1:.55});
+   hover(r,`${d[0]}: <b>${d[1].toFixed(1)}×</b> sales`);svg.appendChild(r);
+   svg.appendChild(E("text",{x:x+bwid/2,y:y-6,"text-anchor":"middle",class:"vlabel"})).textContent=d[1].toFixed(1)+"×";
+   const t=E("text",{x:x+bwid/2,y:base+16,"text-anchor":"middle",class:"axis"});t.textContent=d[0];svg.appendChild(t);
+ });
+ svg.appendChild(E("text",{x:padL,y:base+34,class:"axis",style:"font-size:11px"})).textContent="Magenta = Meesho · P/S = market cap ÷ revenue";
+ document.getElementById("peerChart").appendChild(svg);
+})();
+
+const GROWTH=[.30,.28,.25,.22,.20,.18,.16,.14,.12,.10];
+const FCFM=[.02,.04,.06,.08,.10,.12,.14,.16,.18,.20];
+const NET_CASH=2500, SHARES=451.31;
+function dcf(wacc,g){let rev=9389.9,pv=0,last=0;
+ for(let i=0;i<10;i++){rev*=(1+GROWTH[i]);const f=rev*FCFM[i];pv+=f/Math.pow(1+wacc,i+1);last=f;}
+ const tv=last*(1+g)/(wacc-g), pvtv=tv/Math.pow(1+wacc,10);
+ return (pv+pvtv+NET_CASH)/SHARES;}
+const wEl=document.getElementById("wacc"),gEl=document.getElementById("g");
+function updateDCF(){
+ const wacc=+wEl.value/100, g=+gEl.value/100;
+ document.getElementById("waccV").textContent=(wacc*100).toFixed(1)+"%";
+ document.getElementById("gV").textContent=(g*100).toFixed(1)+"%";
+ const fv=dcf(wacc,g);
+ const fvEl=document.getElementById("fv");fvEl.textContent="₹"+fv.toFixed(0);
+ let col=C.ink,msg="";
+ if(fv>=192){col=C.green;msg=`Above the current ₹192 — the model implies further upside at these assumptions.`;}
+ else if(fv>=111){col=C.amber;msg=`Between the ₹111 issue and ₹192 market price — the offer looks fairly priced, the market ahead of base case.`;}
+ else{col=C.red;msg=`Below the ₹111 issue price — these assumptions imply the stock was expensive.`;}
+ fvEl.style.color=col;
+ const disc=((fv/111-1)*100);
+ document.getElementById("verdict").innerHTML=`${msg} <span class="mono" style="color:${col}">(${disc>=0?'+':''}${disc.toFixed(0)}% vs issue)</span>`;
+}
+wEl.addEventListener("input",updateDCF);gEl.addEventListener("input",updateDCF);updateDCF();
+</script>
+</body>
+</html>
