@@ -8,7 +8,7 @@ investment thesis, ESG, and a final recommendation.
 - **Meesho Analysis Notebook.ipynb** — Python notebook that recomputes all ratios, valuation multiples, 
   and the DCF directly from the financial statements
 - **Meesho IPO Dashboard.html** — interactive dashboard with a live DCF calculator  
-  → [**View it live**](https://mrugaja-0702.github.io/Meesho-IPO-Analysis/Meesho_IPO_Dashboard.html)
+  → [**View it live**](https://mrugaja-0702.github.io/Meesho-IPO-Analysis/Meesho-IPO-Dashboard.html)
 
 Companion Excel model and Tableau dashboard linked in the report's methodology appendix.
 
